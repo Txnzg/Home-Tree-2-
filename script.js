@@ -1,646 +1,608 @@
-/* =========================
-   เช็กพืช
-========================= */
+// ==========================================
+// SoilMatch - script.js
+// GBIF Plant Search + Soil + Area Prototype
+// ==========================================
 
-function searchPlant() {
+const GBIF_API = "https://api.gbif.org/v2/species/match";
 
-    const input =
-        document
-        .getElementById("plantInput")
-        .value
-        .trim()
-        .toLowerCase();
+// ==========================================
+// 1. ค้นหาพืชจาก GBIF
+// ==========================================
 
+async function searchPlant() {
+    const input = document.getElementById("plantInput");
+    const result = document.getElementById("plantResult");
 
-    const result =
-        document.getElementById("plantResult");
+    const name = input.value.trim();
 
-
-    if (!input) {
-
+    if (!name) {
         result.innerHTML = `
-            <div class="empty">
-                🌱 กรุณาพิมพ์ชื่อพืช
+            <div class="result-empty">
+                กรุณาพิมพ์ชื่อพืชก่อนค้นหา
             </div>
         `;
-
         return;
     }
-
-
-    const plant =
-        plants.find(p =>
-            p.name.toLowerCase().includes(input) ||
-            p.scientific.toLowerCase().includes(input)
-        );
-
-
-    if (!plant) {
-
-        result.innerHTML = `
-            <div class="empty">
-
-                🔎 ไม่พบข้อมูลพืช
-
-                <p>
-                    ลองค้นด้วยชื่อภาษาไทย
-                    หรือชื่อวิทยาศาสตร์
-                </p>
-
-            </div>
-        `;
-
-        return;
-    }
-
 
     result.innerHTML = `
-
-        <div class="result-card">
-
-            <h3>
-                ${plant.name}
-            </h3>
-
-            <div class="english-name">
-                ${plant.scientific}
-            </div>
-
-
-            <div class="info-grid">
-
-                <div class="info">
-                    <small>ดินที่เหมาะสม</small>
-                    <strong>
-                        ${plant.soil.join(" / ")}
-                    </strong>
-                </div>
-
-
-                <div class="info">
-                    <small>pH</small>
-                    <strong>
-                        ${plant.ph}
-                    </strong>
-                </div>
-
-
-                <div class="info">
-                    <small>ความชื้น</small>
-                    <strong>
-                        ${plant.moisture}
-                    </strong>
-                </div>
-
-
-                <div class="info">
-                    <small>การระบายน้ำ</small>
-                    <strong>
-                        ${plant.drainage}
-                    </strong>
-                </div>
-
-
-                <div class="info">
-                    <small>แสงแดด</small>
-                    <strong>
-                        ${plant.light}
-                    </strong>
-                </div>
-
-
-                <div class="info">
-                    <small>อุณหภูมิ</small>
-                    <strong>
-                        ${plant.temperature}
-                    </strong>
-                </div>
-
-            </div>
-
-
-            <p>
-                <b>ปริมาณน้ำฝน:</b>
-                ${plant.rainfall}
-            </p>
-
-
-            <p>
-                <b>สภาพพื้นที่:</b>
-                ${plant.terrain}
-            </p>
-
+        <div class="result-loading">
+            🌱 กำลังค้นหาข้อมูลจาก GBIF...
         </div>
     `;
-}
 
+    try {
+        const url =
+            `${GBIF_API}?name=${encodeURIComponent(name)}&verbose=true`;
 
+        const response = await fetch(url);
 
-/* กด Enter เพื่อค้นหาพืช */
-
-document
-    .getElementById("plantInput")
-    .addEventListener("keydown", function(event) {
-
-        if (event.key === "Enter") {
-
-            searchPlant();
-
+        if (!response.ok) {
+            throw new Error("GBIF API error");
         }
 
-    });
-
-
-
-/* =========================
-   วิเคราะห์ดิน
-========================= */
-
-function searchSoil() {
-
-    const input =
-        document
-        .getElementById("soilInput")
-        .value
-        .trim()
-        .toLowerCase();
-
-
-    const list =
-        document.getElementById("soilList");
-
-
-    if (!input) {
-
-        list.innerHTML = "";
-
-        return;
-    }
-
-
-    const matches =
-        soils.filter(soil =>
-
-            soil.name
-            .toLowerCase()
-            .includes(input)
-
-            ||
-
-            soil.english
-            .toLowerCase()
-            .includes(input)
-
-        );
-
-
-    list.innerHTML =
-        matches.map(soil => `
-
-            <div
-                class="search-result"
-                onclick="showSoil('${soil.name}')"
-            >
-
-                <b>
-                    ${soil.name}
-                </b>
-
-                <small>
-                    — ${soil.english}
-                </small>
-
-            </div>
-
-        `).join("");
-
-
-    if (matches.length === 0) {
-
-        list.innerHTML = `
-            <div class="empty">
-                ไม่พบชนิดดิน
-            </div>
-        `;
-
-    }
-
-}
-
-
-
-function showSoil(name) {
-
-    const soil =
-        soils.find(s =>
-            s.name === name
-        );
-
-
-    if (!soil) return;
-
-
-    document.getElementById("soilInput").value =
-        soil.name;
-
-
-    document.getElementById("soilList").innerHTML =
-        "";
-
-
-    const suitablePlants =
-        plants.map(plant => {
-
-            let score = 55;
-
-
-            if (
-                plant.soil.includes(soil.name)
-            ) {
-
-                score += 30;
-
-            }
-
-
-            if (
-                soil.drainage.includes("ดี")
-            ) {
-
-                score += 5;
-
-            }
-
-
-            return {
-
-                ...plant,
-
-                score: Math.min(score, 95)
-
-            };
-
-        })
-        .sort(
-            (a,b) => b.score - a.score
-        );
-
-
-    document.getElementById("soilResult").innerHTML = `
-
-        <div class="result-card">
-
-            <h3>
-                ${soil.name}
-            </h3>
-
-            <div class="english-name">
-                ${soil.english}
-            </div>
-
-
-            <div class="info-grid">
-
-                <div class="info">
-                    <small>ลักษณะเนื้อดิน</small>
-                    <strong>${soil.texture}</strong>
+        const data = await response.json();
+
+        // ไม่พบข้อมูล
+        if (!data.usage) {
+            result.innerHTML = `
+                <div class="result-empty">
+                    ❌ ไม่พบข้อมูลพืช
+                    <br>
+                    <small>
+                        ลองใช้ชื่อภาษาอังกฤษหรือชื่อวิทยาศาสตร์
+                    </small>
+                </div>
+            `;
+            return;
+        }
+
+        const plant = data.usage;
+
+        const scientificName =
+            plant.canonicalName ||
+            plant.name ||
+            "ไม่พบชื่อวิทยาศาสตร์";
+
+        const rank =
+            plant.rank ||
+            "ไม่ระบุ";
+
+        const status =
+            plant.status ||
+            "ไม่ระบุ";
+
+        const kingdom =
+            plant.kingdom ||
+            "ไม่ระบุ";
+
+        const family =
+            plant.family ||
+            "ไม่ระบุ";
+
+        const genus =
+            plant.genus ||
+            "ไม่ระบุ";
+
+        // ==========================================
+        // แสดงผล
+        // ==========================================
+
+        result.innerHTML = `
+            <div class="plant-result-card">
+
+                <div class="plant-result-header">
+                    <div>
+                        <span class="result-label">
+                            🌱 ผลการค้นหา
+                        </span>
+
+                        <h3>
+                            ${escapeHTML(scientificName)}
+                        </h3>
+
+                        <p>
+                            ชื่อที่ค้นหา:
+                            <strong>${escapeHTML(name)}</strong>
+                        </p>
+                    </div>
                 </div>
 
-                <div class="info">
-                    <small>การระบายน้ำ</small>
-                    <strong>${soil.drainage}</strong>
-                </div>
+                <div class="result-grid">
 
-                <div class="info">
-                    <small>การอุ้มน้ำ</small>
-                    <strong>${soil.water}</strong>
-                </div>
-
-                <div class="info">
-                    <small>อินทรียวัตถุ</small>
-                    <strong>${soil.organic}</strong>
-                </div>
-
-                <div class="info">
-                    <small>pH</small>
-                    <strong>${soil.ph}</strong>
-                </div>
-
-            </div>
-
-
-            <h3>
-                🌱 พืชที่มีความเหมาะสม
-            </h3>
-
-
-            ${
-
-                suitablePlants.map(plant => `
-
-                    <div class="score-row">
-
-                        <div>
-
-                            <b>
-                                ${plant.name}
-                            </b>
-
-                            <div class="bar">
-
-                                <span
-                                    style="
-                                    width:${plant.score}%
-                                    "
-                                ></span>
-
-                            </div>
-
-                        </div>
-
-
-                        <div class="score">
-                            ${plant.score}%
-                        </div>
-
+                    <div class="result-item">
+                        <span>ชื่อวิทยาศาสตร์</span>
+                        <strong>
+                            ${escapeHTML(scientificName)}
+                        </strong>
                     </div>
 
-                `).join("")
+                    <div class="result-item">
+                        <span>สถานะ</span>
+                        <strong>
+                            ${escapeHTML(status)}
+                        </strong>
+                    </div>
 
-            }
+                    <div class="result-item">
+                        <span>ระดับอนุกรมวิธาน</span>
+                        <strong>
+                            ${escapeHTML(rank)}
+                        </strong>
+                    </div>
 
+                    <div class="result-item">
+                        <span>อาณาจักร</span>
+                        <strong>
+                            ${escapeHTML(kingdom)}
+                        </strong>
+                    </div>
 
-        </div>
+                    <div class="result-item">
+                        <span>วงศ์</span>
+                        <strong>
+                            ${escapeHTML(family)}
+                        </strong>
+                    </div>
 
-    `;
+                    <div class="result-item">
+                        <span>สกุล</span>
+                        <strong>
+                            ${escapeHTML(genus)}
+                        </strong>
+                    </div>
 
-}
+                </div>
 
+                <div class="gbif-source">
+                    แหล่งข้อมูล:
+                    <a
+                        href="https://www.gbif.org/"
+                        target="_blank"
+                        rel="noopener noreferrer"
+                    >
+                        GBIF
+                    </a>
+                </div>
 
-
-/* =========================
-   จังหวัด
-========================= */
-
-function searchProvince() {
-
-    const input =
-        document
-        .getElementById("provinceInput")
-        .value
-        .trim();
-
-
-    const list =
-        document
-        .getElementById("provinceList");
-
-
-    if (!input) {
-
-        list.innerHTML = "";
-
-        return;
-
-    }
-
-
-    const matches =
-        provinces.filter(province =>
-            province.includes(input)
-        );
-
-
-    list.innerHTML =
-        matches.map(province => `
-
-            <div
-                class="search-result"
-                onclick="selectProvince('${province}')"
-            >
-
-                ${province}
-
-            </div>
-
-        `).join("");
-
-
-    if (!matches.length) {
-
-        list.innerHTML = `
-            <div class="empty">
-                ไม่พบจังหวัด
             </div>
         `;
 
+    } catch (error) {
+
+        console.error("GBIF Error:", error);
+
+        result.innerHTML = `
+            <div class="result-empty">
+                ⚠️ ไม่สามารถเชื่อมต่อฐานข้อมูล GBIF ได้
+                <br>
+                <small>
+                    กรุณาลองใหม่อีกครั้ง
+                </small>
+            </div>
+        `;
     }
-
 }
 
 
+// ==========================================
+// 2. กด Enter เพื่อค้นหา
+// ==========================================
 
-function selectProvince(province) {
+document.addEventListener("DOMContentLoaded", () => {
 
-    document
-        .getElementById("provinceInput")
-        .value = province;
+    const plantInput = document.getElementById("plantInput");
 
+    if (plantInput) {
+        plantInput.addEventListener("keydown", (event) => {
 
-    document
-        .getElementById("provinceList")
-        .innerHTML = "";
+            if (event.key === "Enter") {
+                searchPlant();
+            }
 
-}
-
-
-
-/* =========================
-   เตรียมชนิดดินในหน้า
-   วิเคราะห์พื้นที่
-========================= */
-
-const areaSoil =
-    document.getElementById("areaSoil");
-
-
-soils.forEach(soil => {
-
-    const option =
-        document.createElement("option");
-
-
-    option.value = soil.name;
-
-    option.textContent =
-        soil.name;
-
-
-    areaSoil.appendChild(option);
+        });
+    }
 
 });
 
 
+// ==========================================
+// 3. ป้องกัน HTML injection
+// ==========================================
 
-/* =========================
-   วิเคราะห์พื้นที่
-========================= */
+function escapeHTML(value) {
 
-function analyzeArea() {
+    if (value === null || value === undefined) {
+        return "";
+    }
 
-    const province =
-        document
-        .getElementById("provinceInput")
-        .value
-        .trim();
-
-
-    const soilName =
-        document
-        .getElementById("areaSoil")
-        .value;
-
-
-    const result =
-        document
-        .getElementById("areaResult");
+    return String(value)
+        .replace(/&/g, "&amp;")
+        .replace(/</g, "&lt;")
+        .replace(/>/g, "&gt;")
+        .replace(/"/g, "&quot;")
+        .replace(/'/g, "&#039;");
+}
 
 
-    if (!province || !soilName) {
+// ==========================================
+// 4. ระบบค้นหาดินเดิม
+// ==========================================
 
-        result.innerHTML = `
+function searchSoil() {
 
-            <div class="empty">
+    const input =
+        document.getElementById("soilInput");
 
-                ⚠️
-                กรุณาเลือกจังหวัดและชนิดดิน
+    const list =
+        document.getElementById("soilList");
 
+    const keyword =
+        input.value.trim().toLowerCase();
+
+    if (!keyword) {
+        list.innerHTML = "";
+        return;
+    }
+
+    const matches = soils.filter(soil => {
+
+        return (
+            soil.name.toLowerCase().includes(keyword) ||
+            soil.english.toLowerCase().includes(keyword)
+        );
+
+    });
+
+    if (matches.length === 0) {
+
+        list.innerHTML = `
+            <div class="result-empty">
+                ไม่พบชนิดดิน
             </div>
-
         `;
 
         return;
-
     }
 
+    list.innerHTML = matches.map(soil => `
+
+        <button
+            class="soil-search-item"
+            onclick="showSoil('${escapeJS(soil.name)}')"
+        >
+            <strong>${escapeHTML(soil.name)}</strong>
+            <span>${escapeHTML(soil.english)}</span>
+        </button>
+
+    `).join("");
+}
+
+
+// ==========================================
+// 5. แสดงข้อมูลดิน
+// ==========================================
+
+function showSoil(soilName) {
 
     const soil =
-        soils.find(s =>
-            s.name === soilName
+        soils.find(
+            item => item.name === soilName
         );
 
+    const result =
+        document.getElementById("soilResult");
 
     if (!soil) return;
 
-
-    const ranked =
-        plants.map(plant => {
-
-            let score = 50;
-
-
-            if (
-                plant.soil.includes(
-                    soil.name
-                )
-            ) {
-
-                score += 35;
-
-            }
-
-
-            score += 5;
-
-
-            return {
-
-                ...plant,
-
-                score:
-                    Math.min(score, 95)
-
-            };
-
-        })
-        .sort(
-            (a,b) =>
-                b.score - a.score
-        );
-
-
     result.innerHTML = `
 
-        <div class="result-card">
+        <div class="soil-result-card">
 
             <h3>
-                ${province}
+                🧪 ${escapeHTML(soil.name)}
             </h3>
 
             <p>
-                ชนิดดิน:
-                <b>${soil.name}</b>
+                ${escapeHTML(soil.english)}
             </p>
 
+            <div class="result-grid">
+
+                <div class="result-item">
+                    <span>pH</span>
+                    <strong>
+                        ${soil.ph?.join(" – ") || "-"}
+                    </strong>
+                </div>
+
+                <div class="result-item">
+                    <span>การระบายน้ำ</span>
+                    <strong>
+                        ${escapeHTML(soil.drainage || "-")}
+                    </strong>
+                </div>
+
+                <div class="result-item">
+                    <span>การอุ้มน้ำ</span>
+                    <strong>
+                        ${escapeHTML(soil.waterHolding || "-")}
+                    </strong>
+                </div>
+
+            </div>
+
+        </div>
+    `;
+}
+
+
+// ==========================================
+// 6. จังหวัด
+// ==========================================
+
+function searchProvince() {
+
+    const input =
+        document.getElementById("provinceInput");
+
+    const list =
+        document.getElementById("provinceList");
+
+    const keyword =
+        input.value.trim().toLowerCase();
+
+    if (!keyword) {
+        list.innerHTML = "";
+        return;
+    }
+
+    const matches =
+        provinces.filter(province =>
+            province.toLowerCase().includes(keyword)
+        );
+
+    list.innerHTML = matches.map(province => `
+
+        <button
+            class="province-search-item"
+            onclick="selectProvince('${escapeJS(province)}')"
+        >
+            ${escapeHTML(province)}
+        </button>
+
+    `).join("");
+}
+
+
+// ==========================================
+// 7. เลือกจังหวัด
+// ==========================================
+
+let selectedProvince = "";
+
+function selectProvince(province) {
+
+    selectedProvince = province;
+
+    const input =
+        document.getElementById("provinceInput");
+
+    const list =
+        document.getElementById("provinceList");
+
+    input.value = province;
+
+    list.innerHTML = `
+        <div class="selected-province">
+            ✓ เลือกจังหวัด:
+            <strong>
+                ${escapeHTML(province)}
+            </strong>
+        </div>
+    `;
+}
+
+
+// ==========================================
+// 8. เติมรายการดินในหน้า Area
+// ==========================================
+
+document.addEventListener("DOMContentLoaded", () => {
+
+    const select =
+        document.getElementById("areaSoil");
+
+    if (!select || typeof soils === "undefined") {
+        return;
+    }
+
+    select.innerHTML = `
+        <option value="">
+            เลือกชนิดดิน
+        </option>
+    `;
+
+    soils.forEach(soil => {
+
+        const option =
+            document.createElement("option");
+
+        option.value = soil.name;
+        option.textContent =
+            `${soil.name} (${soil.english})`;
+
+        select.appendChild(option);
+
+    });
+
+});
+
+
+// ==========================================
+// 9. วิเคราะห์พื้นที่
+// ==========================================
+
+function analyzeArea() {
+
+    const soilName =
+        document.getElementById("areaSoil").value;
+
+    const result =
+        document.getElementById("areaResult");
+
+    if (!selectedProvince) {
+
+        result.innerHTML = `
+            <div class="result-empty">
+                กรุณาเลือกจังหวัดก่อน
+            </div>
+        `;
+
+        return;
+    }
+
+    if (!soilName) {
+
+        result.innerHTML = `
+            <div class="result-empty">
+                กรุณาเลือกชนิดดินก่อน
+            </div>
+        `;
+
+        return;
+    }
+
+    const soil =
+        soils.find(
+            item => item.name === soilName
+        );
+
+    if (!soil) return;
+
+    // ------------------------------------------
+    // ตอนนี้ยังใช้ข้อมูลพืชใน data.js
+    // ขั้นต่อไปจะเปลี่ยนเป็นฐานข้อมูลจริง
+    // ------------------------------------------
+
+    const results = plants.map(plant => {
+
+        let score = 0;
+
+        // ตรวจชนิดดิน
+        if (
+            plant.soil &&
+            plant.soil.some(
+                s => s === soil.name
+            )
+        ) {
+            score += 50;
+        }
+
+        // ตรวจ pH
+        if (
+            plant.ph &&
+            soil.ph
+        ) {
+
+            const plantMin = plant.ph[0];
+            const plantMax = plant.ph[1];
+
+            const soilMin = soil.ph[0];
+            const soilMax = soil.ph[1];
+
+            if (
+                plantMin <= soilMax &&
+                plantMax >= soilMin
+            ) {
+                score += 30;
+            }
+        }
+
+        score += 20;
+
+        return {
+            ...plant,
+            score: Math.min(score, 100)
+        };
+
+    });
+
+    results.sort(
+        (a, b) => b.score - a.score
+    );
+
+    result.innerHTML = `
+
+        <div class="area-result-card">
 
             <h3>
-                🌿 พืชที่ควรพิจารณา
+                🗺️ ผลการวิเคราะห์
             </h3>
 
+            <p>
+                จังหวัด:
+                <strong>
+                    ${escapeHTML(selectedProvince)}
+                </strong>
+            </p>
 
-            ${
+            <p>
+                ดิน:
+                <strong>
+                    ${escapeHTML(soil.name)}
+                </strong>
+            </p>
 
-                ranked.map(plant => `
+            <div class="plant-ranking">
 
-                    <div class="score-row">
+                ${results.map(plant => `
 
-                        <div>
+                    <div class="ranking-item">
 
-                            <b>
-                                ${plant.name}
-                            </b>
+                        <div class="ranking-header">
 
-                            <div class="bar">
+                            <strong>
+                                ${escapeHTML(plant.name)}
+                            </strong>
 
-                                <span
-                                    style="
-                                    width:${plant.score}%
-                                    "
-                                ></span>
-
-                            </div>
+                            <span>
+                                ${plant.score}%
+                            </span>
 
                         </div>
 
+                        <div class="score-bar">
 
-                        <div class="score">
-                            ${plant.score}%
+                            <div
+                                class="score-fill"
+                                style="width:${plant.score}%"
+                            ></div>
+
                         </div>
 
                     </div>
 
-                `).join("")
+                `).join("")}
 
-            }
+            </div>
 
-
-            <p>
-
-                <small>
-
-                    ผลลัพธ์นี้เป็น
-                    <b>ต้นแบบการประเมิน</b>
-                    โดยในระบบจริงควรนำข้อมูล
-                    สภาพอากาศของจังหวัด
-                    เช่น อุณหภูมิ ปริมาณฝน
-                    และฤดูกาล มาคำนวณร่วมด้วย
-
-                </small>
-
-            </p>
+            <small>
+                * คะแนนนี้เป็นการประเมินจากข้อมูลที่มีในระบบ
+                ไม่ใช่คำแนะนำทางการเกษตรโดยตรง
+            </small>
 
         </div>
-
     `;
+}
 
+
+// ==========================================
+// 10. ป้องกันปัญหาจากข้อความใน onclick
+// ==========================================
+
+function escapeJS(value) {
+
+    return String(value)
+        .replace(/\\/g, "\\\\")
+        .replace(/'/g, "\\'");
 }
