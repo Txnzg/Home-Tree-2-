@@ -1,0 +1,402 @@
+<!DOCTYPE html>
+<html lang="th">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+
+    <title>SoilMatch</title>
+
+    <link rel="stylesheet" href="style.css">
+</head>
+
+<body>
+
+<header class="navbar">
+
+    <a href="#home" class="logo">
+        <span>SM</span>
+        SoilMatch
+    </a>
+
+    <nav>
+        <a href="#home">หน้าหลัก</a>
+        <a href="#plants">เช็กพืช</a>
+        <a href="#soil">วิเคราะห์ดิน</a>
+        <a href="#area">วิเคราะห์พื้นที่</a>
+        <a href="#about">เกี่ยวกับ</a>
+    </nav>
+
+</header>
+
+
+<main>
+
+<!-- ================= HOME ================= -->
+
+<section id="home" class="hero">
+
+    <div class="hero-text">
+
+        <p class="small-title">
+            SOIL • PLANT • PLACE
+        </p>
+
+        <h1>
+            เข้าใจดิน<br>
+            <span>เลือกพืชให้เหมาะ</span>
+        </h1>
+
+        <p class="hero-description">
+            SoilMatch คือเว็บไซต์สำหรับค้นหาความต้องการของพืช
+            วิเคราะห์ชนิดดิน และประเมินความเหมาะสมของพื้นที่
+        </p>
+
+        <a href="#plants" class="main-button">
+            เริ่มค้นหาพืช →
+        </a>
+
+    </div>
+
+
+    <div class="hero-image">
+
+        <div class="sun"></div>
+
+        <div class="mountain mountain1"></div>
+        <div class="mountain mountain2"></div>
+
+        <div class="tree">
+            <div class="trunk"></div>
+            <div class="leaf leaf1"></div>
+            <div class="leaf leaf2"></div>
+            <div class="leaf leaf3"></div>
+        </div>
+
+    </div>
+
+</section>
+
+
+
+<!-- ================= FEATURES ================= -->
+
+<section class="features">
+
+    <div class="section-title">
+
+        <p class="small-title">
+            EXPLORE
+        </p>
+
+        <h2>
+            ระบบของ SoilMatch
+        </h2>
+
+    </div>
+
+
+    <div class="feature-grid">
+
+        <a href="#plants" class="feature-card">
+
+            <div class="feature-icon">
+                🌱
+            </div>
+
+            <h3>
+                เช็กพืช
+            </h3>
+
+            <p>
+                พิมพ์ชื่อพืชที่ต้องการค้นหา
+                แล้วดูว่าพืชนั้นต้องการดินและสภาพแวดล้อมแบบใด
+            </p>
+
+            <strong>
+                ค้นหาพืช →
+            </strong>
+
+        </a>
+
+
+
+        <a href="#soil" class="feature-card">
+
+            <div class="feature-icon">
+                🧪
+            </div>
+
+            <h3>
+                วิเคราะห์ดิน
+            </h3>
+
+            <p>
+                ค้นหาชนิดดิน แล้วดูว่าดินชนิดนั้น
+                สามารถปลูกพืชอะไรได้บ้าง
+            </p>
+
+            <strong>
+                วิเคราะห์ดิน →
+            </strong>
+
+        </a>
+
+
+
+        <a href="#area" class="feature-card">
+
+            <div class="feature-icon">
+                🗺️
+            </div>
+
+            <h3>
+                วิเคราะห์พื้นที่
+            </h3>
+
+            <p>
+                เลือกจังหวัดและชนิดดิน
+                เพื่อประเมินพืชที่เหมาะสมกับพื้นที่
+            </p>
+
+            <strong>
+                วิเคราะห์พื้นที่ →
+            </strong>
+
+        </a>
+
+    </div>
+
+</section>
+
+
+
+<!-- ================= PLANT ================= -->
+
+<section id="plants" class="tool-section">
+
+    <div class="section-title">
+
+        <p class="small-title">
+            01 / PLANT CHECK
+        </p>
+
+        <h2>
+            เช็กพืช
+        </h2>
+
+        <p>
+            พิมพ์ชื่อพืชที่ต้องการค้นหา
+        </p>
+
+    </div>
+
+
+    <div class="tool-box">
+
+        <label>
+            ชื่อพืช
+        </label>
+
+        <div class="search-box">
+
+            <input
+                type="text"
+                id="plantInput"
+                placeholder="เช่น สัก, มะม่วง, ยางนา..."
+            >
+
+            <button onclick="searchPlant()">
+                ค้นหา
+            </button>
+
+        </div>
+
+
+        <div id="plantResult">
+
+            <div class="empty">
+                🌱 พิมพ์ชื่อพืชเพื่อเริ่มค้นหา
+            </div>
+
+        </div>
+
+    </div>
+
+</section>
+
+
+
+<!-- ================= SOIL ================= -->
+
+<section id="soil" class="tool-section beige">
+
+    <div class="section-title">
+
+        <p class="small-title">
+            02 / SOIL ANALYSIS
+        </p>
+
+        <h2>
+            วิเคราะห์ดิน
+        </h2>
+
+        <p>
+            ค้นหาชนิดดินเพื่อดูว่าปลูกพืชอะไรได้บ้าง
+        </p>
+
+    </div>
+
+
+    <div class="tool-box">
+
+        <label>
+            ค้นหาชนิดดิน
+        </label>
+
+        <input
+            type="text"
+            id="soilInput"
+            class="full-input"
+            placeholder="เช่น ดินร่วน, ดินทราย, Arenosol..."
+            oninput="searchSoil()"
+        >
+
+
+        <div id="soilList"></div>
+
+
+        <div id="soilResult">
+
+            <div class="empty">
+                🧪 ค้นหาชนิดดินเพื่อเริ่มวิเคราะห์
+            </div>
+
+        </div>
+
+    </div>
+
+</section>
+
+
+
+<!-- ================= AREA ================= -->
+
+<section id="area" class="tool-section">
+
+    <div class="section-title">
+
+        <p class="small-title">
+            03 / AREA ANALYSIS
+        </p>
+
+        <h2>
+            วิเคราะห์พื้นที่
+        </h2>
+
+        <p>
+            เลือกจังหวัด + ชนิดดิน
+            เพื่อดูพืชที่เหมาะสม
+        </p>
+
+    </div>
+
+
+    <div class="tool-box">
+
+        <label>
+            จังหวัด
+        </label>
+
+        <input
+            type="text"
+            id="provinceInput"
+            class="full-input"
+            placeholder="พิมพ์ชื่อจังหวัด..."
+            oninput="searchProvince()"
+        >
+
+        <div id="provinceList"></div>
+
+
+        <label class="space-label">
+            ชนิดดิน
+        </label>
+
+        <select id="areaSoil">
+
+            <option value="">
+                เลือกชนิดดิน
+            </option>
+
+        </select>
+
+
+        <button
+            class="main-button analyze-button"
+            onclick="analyzeArea()"
+        >
+            วิเคราะห์พื้นที่ →
+        </button>
+
+
+        <div id="areaResult">
+
+            <div class="empty">
+                📍 เลือกจังหวัดและชนิดดิน
+            </div>
+
+        </div>
+
+    </div>
+
+</section>
+
+
+
+<!-- ================= ABOUT ================= -->
+
+<section id="about" class="about">
+
+    <div>
+
+        <p class="small-title">
+            ABOUT SOILMATCH
+        </p>
+
+        <h2>
+            ดิน พืช และพื้นที่
+            <br>
+            ต้องมองไปด้วยกัน
+        </h2>
+
+        <p>
+            SoilMatch เป็นเว็บไซต์ต้นแบบสำหรับศึกษา
+            ความสัมพันธ์ระหว่างชนิดดิน ความต้องการของพืช
+            และสภาพแวดล้อมของแต่ละพื้นที่
+        </p>
+
+        <p>
+            ผลการวิเคราะห์เป็นข้อมูลสำหรับการศึกษา
+            ไม่ควรใช้แทนคำแนะนำจากผู้เชี่ยวชาญหรือ
+            การตรวจสอบสภาพพื้นที่จริง
+        </p>
+
+    </div>
+
+</section>
+
+</main>
+
+
+<footer>
+
+    SoilMatch · School Project
+
+</footer>
+
+
+<script src="data.js"></script>
+<script src="script.js"></script>
+
+</body>
+</html>
